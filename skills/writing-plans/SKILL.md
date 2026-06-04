@@ -19,7 +19,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Context:** If working in an isolated worktree, it should have been created via the `superpowers:using-git-worktrees` skill at execution time.
 
-**Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+**Save plans to:** `docs/battle-plans/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -191,7 +191,7 @@ Your ONLY permitted next action is calling `AskUserQuestion` with this EXACT str
 
 ```yaml
 AskUserQuestion:
-  question: "Plan complete and saved to docs/superpowers/plans/<filename>.md. How would you like to execute it?"
+  question: "Plan complete and saved to docs/battle-plans/<filename>.md. How would you like to execute it?"
   header: "Execution"
   options:
     - label: "Subagent-Driven (this session)"
@@ -350,11 +350,11 @@ TaskUpdate:
 
 At plan completion, write the task persistence file **in the same directory as the plan document**.
 
-If the plan is saved to `docs/superpowers/plans/2026-01-15-feature.md`, the tasks file MUST be saved to `docs/superpowers/plans/2026-01-15-feature.md.tasks.json`.
+If the plan is saved to `docs/battle-plans/2026-01-15-feature.md`, the tasks file MUST be saved to `docs/battle-plans/2026-01-15-feature.md.tasks.json`.
 
 ```json
 {
-  "planPath": "docs/superpowers/plans/2026-01-15-feature.md",
+  "planPath": "docs/battle-plans/2026-01-15-feature.md",
   "tasks": [
     {
       "id": 0,
@@ -374,7 +374,7 @@ If the plan is saved to `docs/superpowers/plans/2026-01-15-feature.md`, the task
 }
 ```
 
-Both the plan `.md` and `.tasks.json` must be co-located in `docs/superpowers/plans/`.
+Both the plan `.md` and `.tasks.json` must be co-located in `docs/battle-plans/`.
 
 ### Resuming Work
 
