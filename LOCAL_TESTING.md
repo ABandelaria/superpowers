@@ -1,6 +1,6 @@
 # Testing Skills Locally (No Marketplace Upload)
 
-Three ways to run these skills against your local Claude Code without publishing to a remote marketplace.
+Two ways to run these skills against your local Claude Code without publishing to a remote marketplace.
 
 This repo is already a complete plugin — it ships `.claude-plugin/marketplace.json`, `.claude-plugin/plugin.json`, `hooks/`, `commands/`, and `skills/`. The hooks are what make skills **auto-trigger**; skills copied without them are dead weight (see `CLAUDE.md`).
 
@@ -15,30 +15,39 @@ Loads the full plugin: skills **+ hooks + commands**. Mirrors real usage.
 /plugin install superpowers-extended-cc@superpowers-extended-cc-marketplace
 ```
 
+Or from the shell (no session needed):
+
+```bash
+claude plugin marketplace add /home/bandelaria/dev/superpowers
+claude plugin install superpowers-extended-cc@superpowers-extended-cc-marketplace
+```
+
 - `marketplace add` accepts a local path to any directory containing `.claude-plugin/marketplace.json`. No git remote required.
 - After install, restart the session (or open `/plugin`) to confirm it is enabled.
-- To pick up edits: re-run install, or `/plugin marketplace update`.
+- To pick up edits, see [Refreshing after edits](#refreshing-after-edits) below.
 
 **Why recommended:** it loads `hooks/`, so the Superpowers bootstrap runs and skills auto-trigger at the right moments.
 
----
-
-## Way 2 — ~~Symlink the plugin into `~/.claude/plugins/`~~ (does not work)
-
-Symlinking a directory into `~/.claude/plugins/` does **not** load a plugin. That directory is registry-managed: Claude Code only loads plugins listed in `~/.claude/plugins/installed_plugins.json`, each pointing at a versioned copy under `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>`. It never scans for loose directories or symlinks.
-
-**Iteration loop instead:** use Way 1, then after each round of edits:
-
-```
-/plugin marketplace update superpowers-extended-cc-marketplace
-/plugin install superpowers-extended-cc@superpowers-extended-cc-marketplace
-```
-
-Because the install is cached by version (`5.5.1-dev`), re-running update + install refreshes the cached copy from the local repo.
+> Symlinking the repo into `~/.claude/plugins/` does **not** work. That directory is registry-managed: Claude Code only loads plugins listed in `~/.claude/plugins/installed_plugins.json`, each pointing at a versioned copy under `~/.claude/plugins/cache/`. It never scans for loose directories or symlinks.
 
 ---
 
-## Way 3 — Personal skills directory (skills only, no hooks)
+## Refreshing after edits
+
+The install is cached by version (`5.5.1-dev`), so edits to the repo do not appear until the cached copy is refreshed. After each round of edits, run:
+
+```bash
+claude plugin marketplace update superpowers-extended-cc-marketplace
+claude plugin install superpowers-extended-cc@superpowers-extended-cc-marketplace
+```
+
+(Or the in-session equivalents: `/plugin marketplace update ...` and `/plugin install ...`.)
+
+Hooks load at session start — restart the session to pick up hook changes.
+
+---
+
+## Way 2 — Personal skills directory (skills only, no hooks)
 
 Global across all projects. Quick test of a single skill.
 
@@ -57,4 +66,4 @@ rm -rf ~/.claude/skills/shared   # not a skill — see below
 
 ## Recommendation
 
-Use **Way 1** for an accurate, hooks-included install that matches production behavior. For edit/test loops, re-run `marketplace update` + `install` after each round of edits (see Way 2 section).
+Use **Way 1** for an accurate, hooks-included install that matches production behavior. For edit/test loops, run the commands in [Refreshing after edits](#refreshing-after-edits) after each round of edits.
