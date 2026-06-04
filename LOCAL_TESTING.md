@@ -34,14 +34,15 @@ claude plugin install superpowers-extended-cc@superpowers-extended-cc-marketplac
 
 ## Refreshing after edits
 
-The install is cached by version (`5.5.1-dev`), so edits to the repo do not appear until the cached copy is refreshed. After each round of edits, run:
+The install is cached by version (`5.5.1-dev`), so edits to the repo do not appear until the cached copy is refreshed. Running `install` while the plugin is already installed is a no-op ("already installed") and leaves the cache stale — you must uninstall first. After each round of edits, run:
 
 ```bash
 claude plugin marketplace update superpowers-extended-cc-marketplace
+claude plugin uninstall superpowers-extended-cc@superpowers-extended-cc-marketplace
 claude plugin install superpowers-extended-cc@superpowers-extended-cc-marketplace
 ```
 
-(Or the in-session equivalents: `/plugin marketplace update ...` and `/plugin install ...`.)
+(Or the in-session equivalents: `/plugin marketplace update ...`, `/plugin uninstall ...`, and `/plugin install ...`.)
 
 Hooks load at session start — restart the session to pick up hook changes.
 
