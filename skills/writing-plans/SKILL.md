@@ -150,7 +150,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
 - DRY, YAGNI, TDD, frequent commits
-- Minimalism ladder when choosing an approach: existing code > stdlib > native platform feature > installed dependency > new code — don't plan abstractions no task needs yet
+- Minimalism ladder when choosing an approach: existing code > stdlib > framework feature (Rails/ActiveSupport/DB constraint) > installed dependency (Gemfile) > new code — don't plan abstractions no task needs yet
 
 ## Self-Review
 

@@ -137,8 +137,8 @@ Write simplest code to pass the test.
 1. **Does this need to exist at all?** Speculative need = skip it, say so in one line (YAGNI)
 2. **Already in this codebase?** Reuse the existing helper, util, type, or pattern
 3. **Stdlib does it?** Use it
-4. **Native platform feature covers it?** Use it
-5. **Already-installed dependency solves it?** Use it — never add a new dependency for what a few lines can do
+4. **Framework or platform feature covers it?** Use it (Rails validation, DB constraint, ActiveSupport helper — over hand-rolled equivalents)
+5. **Already-installed dependency solves it?** Use it (check the Gemfile) — never add a new dependency for what a few lines can do
 6. **Can it be one line?** One line
 7. **Only then:** the minimum code that passes
 
