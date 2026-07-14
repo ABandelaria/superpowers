@@ -133,9 +133,9 @@ Task tool (general-purpose):
 
 ```
 ### Strengths
-- Clean database schema with proper migrations (db/schema.rb:15-42)
+- Clean database schema with proper migrations (db.ts:15-42)
 - Comprehensive test coverage (18 tests, all edge cases)
-- Good error handling with fallbacks (summarizer.rb:85-92)
+- Good error handling with fallbacks (summarizer.ts:85-92)
 
 ### Issues
 
@@ -146,13 +146,13 @@ Task tool (general-purpose):
    - Fix: Add --help case with usage examples
 
 2. **Date validation missing**
-   - File: search.rb:25-27
+   - File: search.ts:25-27
    - Issue: Invalid dates silently return no results
    - Fix: Validate ISO format, throw error with example
 
 #### Minor
 1. **Progress indicators**
-   - File: indexer.rb:130
+   - File: indexer.ts:130
    - Issue: No "X of Y" counter for long operations
    - Impact: Users don't know how long to wait
 

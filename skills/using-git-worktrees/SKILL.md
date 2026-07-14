@@ -116,9 +116,6 @@ cd "$path"
 Auto-detect and run appropriate setup:
 
 ```bash
-# Ruby / Rails
-if [ -f Gemfile ]; then bundle install; fi
-
 # Node.js
 if [ -f package.json ]; then npm install; fi
 
@@ -139,7 +136,7 @@ Run tests to ensure workspace starts clean:
 
 ```bash
 # Use project-appropriate command
-bundle exec rspec / npm test / cargo test / pytest / go test ./...
+npm test / cargo test / pytest / go test ./...
 ```
 
 **If tests fail:** Report failures, ask whether to proceed or investigate.
@@ -170,7 +167,7 @@ Ready to implement <feature-name>
 | Directory not ignored | Add to .gitignore + commit |
 | Permission error on create | Sandbox fallback, work in place |
 | Tests fail during baseline | Report failures + ask |
-| No Gemfile/package.json/Cargo.toml | Skip dependency install |
+| No package.json/Cargo.toml | Skip dependency install |
 
 ## Common Mistakes
 

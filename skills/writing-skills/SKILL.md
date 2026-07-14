@@ -357,7 +357,7 @@ When: All content fits, no heavy reference needed
 ```
 condition-based-waiting/
   SKILL.md    # Overview + patterns
-  example.rb  # Working helpers to adapt
+  example.ts  # Working helpers to adapt
 ```
 When: Tool is reusable code, not just narrative
 
