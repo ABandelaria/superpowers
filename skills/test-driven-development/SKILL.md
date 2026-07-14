@@ -73,35 +73,34 @@ digraph tdd_cycle {
 Write one minimal test showing what should happen.
 
 <Good>
-```ruby
-it 'retries failed operations 3 times' do
-  attempts = 0
-  operation = -> {
-    attempts += 1
-    raise 'fail' if attempts < 3
-    'success'
-  }
+```typescript
+test('retries failed operations 3 times', async () => {
+  let attempts = 0;
+  const operation = () => {
+    attempts++;
+    if (attempts < 3) throw new Error('fail');
+    return 'success';
+  };
 
-  result = retry_operation(operation)
+  const result = await retryOperation(operation);
 
-  expect(result).to eq('success')
-  expect(attempts).to eq(3)
-end
+  expect(result).toBe('success');
+  expect(attempts).toBe(3);
+});
 ```
 Clear name, tests real behavior, one thing
 </Good>
 
 <Bad>
-```ruby
-it 'retry works' do
-  mock_op = double('operation')
-  allow(mock_op).to receive(:call)
-    .and_raise(StandardError, 'fail')
-    .and_raise(StandardError, 'fail')
-    .and_return('success')
-  retry_operation(mock_op)
-  expect(mock_op).to have_received(:call).exactly(3).times
-end
+```typescript
+test('retry works', async () => {
+  const mock = jest.fn()
+    .mockRejectedValueOnce(new Error())
+    .mockRejectedValueOnce(new Error())
+    .mockResolvedValueOnce('success');
+  await retryOperation(mock);
+  expect(mock).toHaveBeenCalledTimes(3);
+});
 ```
 Vague name, tests mock not code
 </Bad>
@@ -116,7 +115,7 @@ Vague name, tests mock not code
 **MANDATORY. Never skip.**
 
 ```bash
-bundle exec rspec spec/path/to/file_spec.rb
+npm test path/to/test.test.ts
 ```
 
 Confirm:
@@ -133,33 +132,33 @@ Confirm:
 Write simplest code to pass the test.
 
 <Good>
-```ruby
-def retry_operation(fn, max_retries: 3)
-  attempts = 0
-  begin
-    attempts += 1
-    fn.call
-  rescue => e
-    retry if attempts < max_retries
-    raise e
-  end
-end
+```typescript
+async function retryOperation<T>(fn: () => Promise<T>): Promise<T> {
+  for (let i = 0; i < 3; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (i === 2) throw e;
+    }
+  }
+  throw new Error('unreachable');
+}
 ```
 Just enough to pass
 </Good>
 
 <Bad>
-```ruby
-def retry_operation(
-  fn,
-  max_retries: 3,
-  backoff: :linear,
-  on_retry: nil,
-  timeout: nil,
-  jitter: false
-)
-  # YAGNI
-end
+```typescript
+async function retryOperation<T>(
+  fn: () => Promise<T>,
+  options?: {
+    maxRetries?: number;
+    backoff?: 'linear' | 'exponential';
+    onRetry?: (attempt: number) => void;
+  }
+): Promise<T> {
+  // YAGNI
+}
 ```
 Over-engineered
 </Bad>
@@ -171,7 +170,7 @@ Don't add features, refactor other code, or "improve" beyond the test.
 **MANDATORY.**
 
 ```bash
-bundle exec rspec spec/path/to/file_spec.rb
+npm test path/to/test.test.ts
 ```
 
 Confirm:
@@ -293,31 +292,33 @@ Tests-first force edge case discovery before implementing. Tests-after verify yo
 **Bug:** Empty email accepted
 
 **RED**
-```ruby
-it 'rejects empty email' do
-  result = submit_form(email: '')
-  expect(result[:error]).to eq('Email required')
-end
+```typescript
+test('rejects empty email', async () => {
+  const result = await submitForm({ email: '' });
+  expect(result.error).toBe('Email required');
+});
 ```
 
 **Verify RED**
 ```bash
-$ bundle exec rspec spec/forms/submit_form_spec.rb
-FAILED: expected "Email required" but got nil
+$ npm test
+FAIL: expected 'Email required', got undefined
 ```
 
 **GREEN**
-```ruby
-def submit_form(data)
-  return { error: 'Email required' } if data[:email].to_s.strip.empty?
-  # ...
-end
+```typescript
+function submitForm(data: FormData) {
+  if (!data.email?.trim()) {
+    return { error: 'Email required' };
+  }
+  // ...
+}
 ```
 
 **Verify GREEN**
 ```bash
-$ bundle exec rspec spec/forms/submit_form_spec.rb
-1 example, 0 failures
+$ npm test
+PASS
 ```
 
 **REFACTOR**

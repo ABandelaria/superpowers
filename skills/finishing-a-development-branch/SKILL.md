@@ -21,7 +21,7 @@ Guide completion of development work by presenting clear options and handling ch
 
 ```bash
 # Run project's test suite
-bundle exec rspec / npm test / cargo test / pytest / go test ./...
+npm test / cargo test / pytest / go test ./...
 ```
 
 **If tests fail:**
