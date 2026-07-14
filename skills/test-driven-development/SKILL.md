@@ -132,6 +132,18 @@ Confirm:
 
 Write simplest code to pass the test.
 
+**The minimalism ladder — stop at the first rung that holds:**
+
+1. **Does this need to exist at all?** Speculative need = skip it, say so in one line (YAGNI)
+2. **Already in this codebase?** Reuse the existing helper, util, type, or pattern
+3. **Stdlib does it?** Use it
+4. **Native platform feature covers it?** Use it
+5. **Already-installed dependency solves it?** Use it — never add a new dependency for what a few lines can do
+6. **Can it be one line?** One line
+7. **Only then:** the minimum code that passes
+
+Never simplify away: input validation at trust boundaries, error handling that prevents data loss, security measures, accessibility basics, anything the spec explicitly requires.
+
 <Good>
 ```ruby
 def retry_operation(fn, max_retries: 3)

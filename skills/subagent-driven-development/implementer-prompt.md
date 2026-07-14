@@ -52,6 +52,22 @@ Task tool (general-purpose):
     **While you work:** If you encounter something unexpected or unclear, **ask questions**.
     It's always OK to pause and clarify. Don't guess or make assumptions.
 
+    ## Minimalism Ladder
+
+    Before writing any code, stop at the first rung that holds:
+
+    1. **Does this need to exist at all?** Speculative need = skip it, note it in your report (YAGNI)
+    2. **Already in this codebase?** Reuse the existing helper, util, type, or pattern — look before you write
+    3. **Stdlib does it?** Use it
+    4. **Native platform feature covers it?** Use it
+    5. **Already-installed dependency solves it?** Use it — never add a new dependency for what a few lines can do
+    6. **Can it be one line?** One line
+    7. **Only then:** the minimum code that satisfies the task
+
+    Never simplify away: input validation at trust boundaries, error handling that
+    prevents data loss, security measures, accessibility basics, anything the task
+    explicitly specifies.
+
     ## Code Organization
 
     You reason best about code you can hold in context at once, and your edits are more
@@ -98,6 +114,7 @@ Task tool (general-purpose):
 
     **Discipline:**
     - Did I avoid overbuilding (YAGNI)?
+    - Did I stop at the lowest rung of the minimalism ladder that held?
     - Did I only build what was requested?
     - Did I follow existing patterns in the codebase?
 
