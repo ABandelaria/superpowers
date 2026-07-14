@@ -17,7 +17,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Context:** If working in an isolated worktree, it should have been created via the `superpowers:using-git-worktrees` skill at execution time.
+**Context:** If working in an isolated worktree, it should have been created via the `superpowers-extended-cc:using-git-worktrees` skill at execution time.
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)
@@ -79,8 +79,17 @@ Key principle: TDD cycles happen WITHIN tasks, not as separate tasks. A task is 
 
 **Tech Stack:** [Key technologies/libraries]
 
+**User decisions (already made):** [One line per decision the user made during brainstorming/planning, quotable. "none" if none.]
+
 ---
 ```
+
+### Deferred decisions
+
+If the plan schedules questions for the user (a DECIDE list, an AskUserQuestion step), each question MUST:
+- Cite why it is still open despite the header decisions. If a recorded decision answers it, answer from the record — do not re-ask.
+- Carry the facts needed to answer it in the option descriptions: name the artifact AND its role/state (e.g. "stale GitHub mirror, last push 2026-03-25 — separate from your local-tools dev home"), and state what does NOT change under each option.
+- Recommend nothing that contradicts a recorded decision. That is a plan failure (same severity as No Placeholders).
 
 ## Task Structure
 
@@ -286,7 +295,9 @@ See `skills/shared/task-format-reference.md` → "User-Thrown Gates" for the ful
 
 **Why it matters.** Both execution paths (`executing-plans` and `subagent-driven-development`) read the task description via TaskGet and pass it to the implementing subagent. A one-sentence description makes the subagent improvise AC. The plan `.md` is not a fallback — TaskGet does not read it.
 
-**Self-check before finishing the skill.** After TaskCreate for every task, open the task description (via TaskGet or by reading `<plan>.tasks.json`) and confirm all four section headers (`**Goal:**`, `**Files:**`, `**Acceptance Criteria:**`, `**Verify:**`) AND the `json:metadata` fence are present. If any section is missing → TaskUpdate the description to the full block.
+**Self-check before finishing the skill.** Read `<plan>.tasks.json` once and confirm every task description contains all four section headers (`**Goal:**`, `**Files:**`, `**Acceptance Criteria:**`, `**Verify:**`) AND the `json:metadata` fence. Fall back to per-task TaskGet only if the tasks file is missing. If any section is missing → TaskUpdate the description to the full block.
+
+**Keep subjects compact.** The harness re-injects every task's subject line into context on periodic reminders, so subjects are paid for repeatedly — aim for ≤ 60 characters and put detail in the description.
 
 ```yaml
 TaskCreate:
@@ -306,7 +317,7 @@ TaskCreate:
     [Key actions from task's Steps — abbreviated]
 
     ```json:metadata
-    {"files": ["path/to/file1.py"], "verifyCommand": "pytest tests/path/ -v", "acceptanceCriteria": ["criterion 1", "criterion 2"]}
+    {"files": ["path/to/file1.py"], "verifyCommand": "pytest tests/path/ -v", "acceptanceCriteria": ["criterion 1", "criterion 2"], "modelTier": "mechanical"}
     ```
   activeForm: "Implementing [Component Name]"
 ```
@@ -360,14 +371,14 @@ If the plan is saved to `docs/superpowers/plans/2026-01-15-feature.md`, the task
       "id": 0,
       "subject": "Task 0: ...",
       "status": "pending",
-      "description": "**Goal:** ...\n\n**Files:**\n...\n\n```json:metadata\n{\"files\": [\"path/to/file.py\"], \"verifyCommand\": \"pytest tests/ -v\", \"acceptanceCriteria\": [\"criterion 1\"]}\n```"
+      "description": "**Goal:** ...\n\n**Files:**\n...\n\n```json:metadata\n{\"files\": [\"path/to/file.py\"], \"verifyCommand\": \"pytest tests/ -v\", \"acceptanceCriteria\": [\"criterion 1\"], \"modelTier\": \"mechanical\"}\n```"
     },
     {
       "id": 1,
       "subject": "Task 1: ...",
       "status": "pending",
       "blockedBy": [0],
-      "description": "**Goal:** ...\n\n```json:metadata\n{\"files\": [], \"verifyCommand\": \"\", \"acceptanceCriteria\": []}\n```"
+      "description": "**Goal:** ...\n\n```json:metadata\n{\"files\": [], \"verifyCommand\": \"\", \"acceptanceCriteria\": [], \"modelTier\": \"standard\"}\n```"
     }
   ],
   "lastUpdated": "<timestamp>"
