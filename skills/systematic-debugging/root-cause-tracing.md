@@ -38,55 +38,54 @@ Error: git init failed in ~/project/packages/core
 
 ### 2. Find Immediate Cause
 **What code directly causes this?**
-```typescript
-await execFileAsync('git', ['init'], { cwd: projectDir });
+```ruby
+system('git', 'init', chdir: project_dir)
 ```
 
 ### 3. Ask: What Called This?
-```typescript
-WorktreeManager.createSessionWorktree(projectDir, sessionId)
-  → called by Session.initializeWorkspace()
-  → called by Session.create()
-  → called by test at Project.create()
+```ruby
+WorktreeManager.create_session_worktree(project_dir, session_id)
+  # → called by Session#initialize_workspace
+  # → called by Session.create
+  # → called by spec at Project.create
 ```
 
 ### 4. Keep Tracing Up
 **What value was passed?**
-- `projectDir = ''` (empty string!)
-- Empty string as `cwd` resolves to `process.cwd()`
+- `project_dir = ''` (empty string!)
+- Empty string as `chdir` falls back to `Dir.pwd`
 - That's the source code directory!
 
 ### 5. Find Original Trigger
 **Where did empty string come from?**
-```typescript
-const context = setupCoreTest(); // Returns { tempDir: '' }
-Project.create('name', context.tempDir); // Accessed before beforeEach!
+```ruby
+let(:context) { setup_core_test }  # Returns { temp_dir: '' }
+Project.create('name', context[:temp_dir])  # Accessed before the before hook ran!
 ```
 
 ## Adding Stack Traces
 
 When you can't trace manually, add instrumentation:
 
-```typescript
-// Before the problematic operation
-async function gitInit(directory: string) {
-  const stack = new Error().stack;
-  console.error('DEBUG git init:', {
-    directory,
-    cwd: process.cwd(),
-    nodeEnv: process.env.NODE_ENV,
-    stack,
-  });
+```ruby
+# Before the problematic operation
+def git_init(directory)
+  warn "DEBUG git init: #{{
+    directory: directory,
+    cwd: Dir.pwd,
+    rails_env: ENV['RAILS_ENV'],
+    stack: caller.join("\n"),
+  }.inspect}"
 
-  await execFileAsync('git', ['init'], { cwd: directory });
-}
+  system('git', 'init', chdir: directory)
+end
 ```
 
-**Critical:** Use `console.error()` in tests (not logger - may not show)
+**Critical:** Use `warn` / `$stderr.puts` in tests (not the logger - may be suppressed)
 
 **Run and capture:**
 ```bash
-npm test 2>&1 | grep 'DEBUG git init'
+bundle exec rspec 2>&1 | grep 'DEBUG git init'
 ```
 
 **Analyze stack traces:**
@@ -101,7 +100,7 @@ If something appears during tests but you don't know which test:
 Use the bisection script `find-polluter.sh` in this directory:
 
 ```bash
-./find-polluter.sh '.git' 'src/**/*.test.ts'
+./find-polluter.sh '.git' 'spec/**/*_spec.rb'
 ```
 
 Runs tests one-by-one, stops at first polluter. See script for usage.
@@ -111,20 +110,20 @@ Runs tests one-by-one, stops at first polluter. See script for usage.
 **Symptom:** `.git` created in `packages/core/` (source code)
 
 **Trace chain:**
-1. `git init` runs in `process.cwd()` ← empty cwd parameter
+1. `git init` runs in `Dir.pwd` ← empty chdir parameter
 2. WorktreeManager called with empty projectDir
 3. Session.create() passed empty string
-4. Test accessed `context.tempDir` before beforeEach
-5. setupCoreTest() returns `{ tempDir: '' }` initially
+4. Spec accessed `context[:temp_dir]` before the `before` hook
+5. `setup_core_test` returns `{ temp_dir: '' }` initially
 
 **Root cause:** Top-level variable initialization accessing empty value
 
-**Fix:** Made tempDir a getter that throws if accessed before beforeEach
+**Fix:** Made temp_dir a method that raises if accessed before the `before` hook
 
 **Also added defense-in-depth:**
 - Layer 1: Project.create() validates directory
 - Layer 2: WorkspaceManager validates not empty
-- Layer 3: NODE_ENV guard refuses git init outside tmpdir
+- Layer 3: Rails.env guard refuses git init outside tmpdir
 - Layer 4: Stack trace logging before git init
 
 ## Key Principle
@@ -155,10 +154,10 @@ digraph principle {
 
 ## Stack Trace Tips
 
-**In tests:** Use `console.error()` not logger - logger may be suppressed
+**In tests:** Use `warn` / `$stderr.puts` not the logger - logger may be suppressed
 **Before operation:** Log before the dangerous operation, not after it fails
 **Include context:** Directory, cwd, environment variables, timestamps
-**Capture stack:** `new Error().stack` shows complete call chain
+**Capture stack:** `caller` shows complete call chain
 
 ## Real-World Impact
 

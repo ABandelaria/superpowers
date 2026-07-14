@@ -22,66 +22,51 @@ Different layers catch different cases:
 ### Layer 1: Entry Point Validation
 **Purpose:** Reject obviously invalid input at API boundary
 
-```typescript
-function createProject(name: string, workingDirectory: string) {
-  if (!workingDirectory || workingDirectory.trim() === '') {
-    throw new Error('workingDirectory cannot be empty');
-  }
-  if (!existsSync(workingDirectory)) {
-    throw new Error(`workingDirectory does not exist: ${workingDirectory}`);
-  }
-  if (!statSync(workingDirectory).isDirectory()) {
-    throw new Error(`workingDirectory is not a directory: ${workingDirectory}`);
-  }
-  // ... proceed
-}
+```ruby
+def create_project(name, working_directory)
+  raise ArgumentError, 'working_directory cannot be empty' if working_directory.to_s.strip.empty?
+  raise ArgumentError, "working_directory does not exist: #{working_directory}" unless File.exist?(working_directory)
+  raise ArgumentError, "working_directory is not a directory: #{working_directory}" unless File.directory?(working_directory)
+  # ... proceed
+end
 ```
 
 ### Layer 2: Business Logic Validation
 **Purpose:** Ensure data makes sense for this operation
 
-```typescript
-function initializeWorkspace(projectDir: string, sessionId: string) {
-  if (!projectDir) {
-    throw new Error('projectDir required for workspace initialization');
-  }
-  // ... proceed
-}
+```ruby
+def initialize_workspace(project_dir, session_id)
+  raise ArgumentError, 'project_dir required for workspace initialization' if project_dir.to_s.empty?
+  # ... proceed
+end
 ```
 
 ### Layer 3: Environment Guards
 **Purpose:** Prevent dangerous operations in specific contexts
 
-```typescript
-async function gitInit(directory: string) {
-  // In tests, refuse git init outside temp directories
-  if (process.env.NODE_ENV === 'test') {
-    const normalized = normalize(resolve(directory));
-    const tmpDir = normalize(resolve(tmpdir()));
+```ruby
+def git_init(directory)
+  # In tests, refuse git init outside temp directories
+  if Rails.env.test?
+    normalized = File.expand_path(directory)
+    tmp_dir = File.expand_path(Dir.tmpdir)
 
-    if (!normalized.startsWith(tmpDir)) {
-      throw new Error(
-        `Refusing git init outside temp dir during tests: ${directory}`
-      );
-    }
-  }
-  // ... proceed
-}
+    unless normalized.start_with?(tmp_dir)
+      raise "Refusing git init outside temp dir during tests: #{directory}"
+    end
+  end
+  # ... proceed
+end
 ```
 
 ### Layer 4: Debug Instrumentation
 **Purpose:** Capture context for forensics
 
-```typescript
-async function gitInit(directory: string) {
-  const stack = new Error().stack;
-  logger.debug('About to git init', {
-    directory,
-    cwd: process.cwd(),
-    stack,
-  });
-  // ... proceed
-}
+```ruby
+def git_init(directory)
+  Rails.logger.debug("About to git init: #{{ directory: directory, cwd: Dir.pwd, stack: caller }.inspect}")
+  # ... proceed
+end
 ```
 
 ## Applying the Pattern
@@ -100,12 +85,12 @@ Bug: Empty `projectDir` caused `git init` in source code
 **Data flow:**
 1. Test setup → empty string
 2. `Project.create(name, '')`
-3. `WorkspaceManager.createWorkspace('')`
-4. `git init` runs in `process.cwd()`
+3. `WorkspaceManager.create_workspace('')`
+4. `git init` runs in `Dir.pwd`
 
 **Four layers added:**
-- Layer 1: `Project.create()` validates not empty/exists/writable
-- Layer 2: `WorkspaceManager` validates projectDir not empty
+- Layer 1: `Project.create` validates not empty/exists/writable
+- Layer 2: `WorkspaceManager` validates project_dir not empty
 - Layer 3: `WorktreeManager` refuses git init outside tmpdir in tests
 - Layer 4: Stack trace logging before git init
 
