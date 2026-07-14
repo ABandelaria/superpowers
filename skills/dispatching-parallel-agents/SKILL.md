@@ -65,12 +65,12 @@ Each agent gets:
 
 ### 3. Dispatch in Parallel
 
-```typescript
-// In Claude Code / AI environment
-Task("Fix agent-tool-abort.test.ts failures")
-Task("Fix batch-completion-behavior.test.ts failures")
-Task("Fix tool-approval-race-conditions.test.ts failures")
-// All three run concurrently
+```text
+# In Claude Code / AI environment
+Task("Fix agent_tool_abort_spec.rb failures")
+Task("Fix batch_completion_behavior_spec.rb failures")
+Task("Fix tool_approval_race_conditions_spec.rb failures")
+# All three run concurrently
 ```
 
 ### 4. Review and Integrate
@@ -89,11 +89,11 @@ Good agent prompts are:
 3. **Specific about output** - What should the agent return?
 
 ```markdown
-Fix the 3 failing tests in src/agents/agent-tool-abort.test.ts:
+Fix the 3 failing tests in spec/agents/agent_tool_abort_spec.rb:
 
 1. "should abort tool with partial output capture" - expects 'interrupted at' in message
 2. "should handle mixed completed and aborted tools" - fast tool aborted instead of completed
-3. "should properly track pendingToolCount" - expects 3 results but gets 0
+3. "should properly track pending_tool_count" - expects 3 results but gets 0
 
 These are timing/race condition issues. Your task:
 
@@ -112,7 +112,7 @@ Return: Summary of what you found and what you fixed.
 ## Common Mistakes
 
 **❌ Too broad:** "Fix all the tests" - agent gets lost
-**✅ Specific:** "Fix agent-tool-abort.test.ts" - focused scope
+**✅ Specific:** "Fix agent_tool_abort_spec.rb" - focused scope
 
 **❌ No context:** "Fix the race condition" - agent doesn't know where
 **✅ Context:** Paste the error messages and test names
@@ -135,22 +135,22 @@ Return: Summary of what you found and what you fixed.
 **Scenario:** 6 test failures across 3 files after major refactoring
 
 **Failures:**
-- agent-tool-abort.test.ts: 3 failures (timing issues)
-- batch-completion-behavior.test.ts: 2 failures (tools not executing)
-- tool-approval-race-conditions.test.ts: 1 failure (execution count = 0)
+- agent_tool_abort_spec.rb: 3 failures (timing issues)
+- batch_completion_behavior_spec.rb: 2 failures (tools not executing)
+- tool_approval_race_conditions_spec.rb: 1 failure (execution count = 0)
 
 **Decision:** Independent domains - abort logic separate from batch completion separate from race conditions
 
 **Dispatch:**
 ```
-Agent 1 → Fix agent-tool-abort.test.ts
-Agent 2 → Fix batch-completion-behavior.test.ts
-Agent 3 → Fix tool-approval-race-conditions.test.ts
+Agent 1 → Fix agent_tool_abort_spec.rb
+Agent 2 → Fix batch_completion_behavior_spec.rb
+Agent 3 → Fix tool_approval_race_conditions_spec.rb
 ```
 
 **Results:**
 - Agent 1: Replaced timeouts with event-based waiting
-- Agent 2: Fixed event structure bug (threadId in wrong place)
+- Agent 2: Fixed event structure bug (thread_id in wrong place)
 - Agent 3: Added wait for async tool execution to complete
 
 **Integration:** All fixes independent, no conflicts, full suite green

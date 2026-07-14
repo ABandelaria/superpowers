@@ -143,7 +143,7 @@ Before ANY execution-time AskUserQuestion — plan-scripted or relayed from an i
 ```
 You: I'm using Subagent-Driven Development to execute this plan.
 
-[Read plan file once: docs/superpowers/plans/feature-plan.md]
+[Read plan file once: docs/battle-plans/feature-plan.md]
 [Extract all 5 tasks with full text and context]
 [TaskCreate for each task with full description]
 

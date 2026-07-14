@@ -21,12 +21,12 @@ Tests must verify real behavior, not mock behavior. Mocks are a means to isolate
 ## Anti-Pattern 1: Testing Mock Behavior
 
 **The violation:**
-```typescript
-// ❌ BAD: Testing that the mock exists
-test('renders sidebar', () => {
-  render(<Page />);
-  expect(screen.getByTestId('sidebar-mock')).toBeInTheDocument();
-});
+```ruby
+# ❌ BAD: Testing that the stub exists
+it 'shows navigation' do
+  visit root_path
+  expect(page).to have_css('[data-testid="nav-stub"]')  # Testing the stub!
+end
 ```
 
 **Why this is wrong:**
@@ -37,15 +37,15 @@ test('renders sidebar', () => {
 **your human partner's correction:** "Are we testing the behavior of a mock?"
 
 **The fix:**
-```typescript
-// ✅ GOOD: Test real component or don't mock it
-test('renders sidebar', () => {
-  render(<Page />);  // Don't mock sidebar
-  expect(screen.getByRole('navigation')).toBeInTheDocument();
-});
+```ruby
+# ✅ GOOD: Test real behavior or don't stub it
+it 'shows navigation' do
+  visit root_path  # Don't stub navigation
+  expect(page).to have_css('nav')  # Test real behavior
+end
 
-// OR if sidebar must be mocked for isolation:
-// Don't assert on the mock - test Page's behavior with sidebar present
+# OR if navigation must be stubbed for isolation:
+# Don't assert on the stub - test the page's behavior with nav present
 ```
 
 ### Gate Function
@@ -63,17 +63,18 @@ BEFORE asserting on any mock element:
 ## Anti-Pattern 2: Test-Only Methods in Production
 
 **The violation:**
-```typescript
-// ❌ BAD: destroy() only used in tests
-class Session {
-  async destroy() {  // Looks like production API!
-    await this._workspaceManager?.destroyWorkspace(this.id);
-    // ... cleanup
-  }
-}
+```ruby
+# ❌ BAD: destroy_workspace only used in tests
+class Session < ApplicationRecord
+  def destroy_workspace
+    # Looks like production API!
+    WorkspaceManager.destroy(workspace_id)
+    # ... cleanup
+  end
+end
 
-// In tests
-afterEach(() => session.destroy());
+# In tests
+after { session.destroy_workspace }
 ```
 
 **Why this is wrong:**
@@ -83,20 +84,17 @@ afterEach(() => session.destroy());
 - Confuses object lifecycle with entity lifecycle
 
 **The fix:**
-```typescript
-// ✅ GOOD: Test utilities handle test cleanup
-// Session has no destroy() - it's stateless in production
+```ruby
+# ✅ GOOD: Test support handles test cleanup
+# Session has no destroy_workspace - it's not its responsibility
 
-// In test-utils/
-export async function cleanupSession(session: Session) {
-  const workspace = session.getWorkspaceInfo();
-  if (workspace) {
-    await workspaceManager.destroyWorkspace(workspace.id);
-  }
-}
+# In spec/support/helpers/session_helpers.rb
+def cleanup_session(session)
+  session.workspace&.destroy
+end
 
-// In tests
-afterEach(() => cleanupSession(session));
+# In tests
+after { cleanup_session(session) }
 ```
 
 ### Gate Function
@@ -118,17 +116,15 @@ BEFORE adding any method to production class:
 ## Anti-Pattern 3: Mocking Without Understanding
 
 **The violation:**
-```typescript
-// ❌ BAD: Mock breaks test logic
-test('detects duplicate server', () => {
-  // Mock prevents config write that test depends on!
-  vi.mock('ToolCatalog', () => ({
-    discoverAndCacheTools: vi.fn().mockResolvedValue(undefined)
-  }));
+```ruby
+# ❌ BAD: Mock breaks test logic
+it 'detects duplicate server' do
+  # Mock prevents config write that test depends on!
+  allow(ToolCatalog).to receive(:discover_and_cache_tools).and_return(nil)
 
-  await addServer(config);
-  await addServer(config);  // Should throw - but won't!
-});
+  add_server(config)
+  add_server(config)  # Should raise - but won't!
+end
 ```
 
 **Why this is wrong:**
@@ -137,15 +133,15 @@ test('detects duplicate server', () => {
 - Test passes for wrong reason or fails mysteriously
 
 **The fix:**
-```typescript
-// ✅ GOOD: Mock at correct level
-test('detects duplicate server', () => {
-  // Mock the slow part, preserve behavior test needs
-  vi.mock('MCPServerManager'); // Just mock slow server startup
+```ruby
+# ✅ GOOD: Mock at correct level
+it 'detects duplicate server' do
+  # Mock only the slow part, preserve behavior test needs
+  allow(McpServerManager).to receive(:start_server)  # Just mock slow server startup
 
-  await addServer(config);  // Config written
-  await addServer(config);  // Duplicate detected ✓
-});
+  add_server(config)  # Config written
+  expect { add_server(config) }.to raise_error(DuplicateServerError)  # Duplicate detected ✓
+end
 ```
 
 ### Gate Function
@@ -177,15 +173,17 @@ BEFORE mocking any method:
 ## Anti-Pattern 4: Incomplete Mocks
 
 **The violation:**
-```typescript
-// ❌ BAD: Partial mock - only fields you think you need
-const mockResponse = {
-  status: 'success',
-  data: { userId: '123', name: 'Alice' }
-  // Missing: metadata that downstream code uses
-};
+```ruby
+# ❌ BAD: Partial stub - only fields you think you need
+let(:mock_response) do
+  {
+    status: 'success',
+    data: { user_id: '123', name: 'Alice' }
+    # Missing: metadata that downstream code uses
+  }
+end
 
-// Later: breaks when code accesses response.metadata.requestId
+# Later: breaks when code accesses response[:metadata][:request_id]
 ```
 
 **Why this is wrong:**
@@ -197,14 +195,16 @@ const mockResponse = {
 **The Iron Rule:** Mock the COMPLETE data structure as it exists in reality, not just fields your immediate test uses.
 
 **The fix:**
-```typescript
-// ✅ GOOD: Mirror real API completeness
-const mockResponse = {
-  status: 'success',
-  data: { userId: '123', name: 'Alice' },
-  metadata: { requestId: 'req-789', timestamp: 1234567890 }
-  // All fields real API returns
-};
+```ruby
+# ✅ GOOD: Mirror real API completeness
+let(:mock_response) do
+  {
+    status: 'success',
+    data: { user_id: '123', name: 'Alice' },
+    metadata: { request_id: 'req-789', timestamp: 1_234_567_890 }
+    # All fields real API returns
+  }
+end
 ```
 
 ### Gate Function
