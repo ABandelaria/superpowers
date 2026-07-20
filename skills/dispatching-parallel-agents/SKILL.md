@@ -65,13 +65,16 @@ Each agent gets:
 
 ### 3. Dispatch in Parallel
 
+Issue all three subagent dispatches in the same response — they run in parallel:
+
 ```text
-# In Claude Code / AI environment
-Task("Fix agent_tool_abort_spec.rb failures")
-Task("Fix batch_completion_behavior_spec.rb failures")
-Task("Fix tool_approval_race_conditions_spec.rb failures")
-# All three run concurrently
+Subagent (general-purpose): "Fix agent_tool_abort_spec.rb failures"
+Subagent (general-purpose): "Fix batch_completion_behavior_spec.rb failures"
+Subagent (general-purpose): "Fix tool_approval_race_conditions_spec.rb failures"
+# All three run concurrently.
 ```
+
+Multiple dispatch calls in one response = parallel execution. One per response = sequential.
 
 ### 4. Review and Integrate
 
