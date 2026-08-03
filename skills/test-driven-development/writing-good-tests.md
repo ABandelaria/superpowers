@@ -29,19 +29,19 @@ fixtures; table-driven tests with literal `want` values are the preferred
 shape. An expectation computed by the code under test — or its helpers —
 passes no matter what that code does:
 
-```typescript
-// ❌ Mirror assertion: the same builder computes both sides — always true
-const expected = buildSearchQuery({ tag: 'urgent' });
-expect(buildSearchQuery({ tag: 'urgent' })).toBe(expected);
+```ruby
+# ❌ Mirror assertion: the same builder computes both sides — always true
+expected = build_search_query(tag: 'urgent')
+expect(build_search_query(tag: 'urgent')).to eq(expected)
 
-// ✅ Hand-derived literal
-expect(buildSearchQuery({ tag: 'urgent' })).toBe('tag:"urgent"');
+# ✅ Hand-derived literal
+expect(build_search_query(tag: 'urgent')).to eq('tag:"urgent"')
 ```
 
 **No change detectors.** If only intentional decisions can fail a test —
 a constant's value, exact message wording, private structure — it fires
 on redesign and sleeps through bugs. Test the behavior that depends on
-the decision: not `expect(MAX_RETRIES).toBe(5)` but "a failing call is
+the decision: not `expect(MAX_RETRIES).to eq(5)` but "a failing call is
 retried 5 times and the 6th attempt never happens."
 
 **Behavior, not text.** Asserting that a script, skill, or config
@@ -85,12 +85,12 @@ is present and fails when it is absent — it says nothing about the
 component. Assert the real component's behavior; if the mock is what you
 are checking, unmock it or delete the assertion.
 
-```typescript
-// ✅ Real behavior
-expect(screen.getByRole('navigation')).toBeInTheDocument();
+```ruby
+# ✅ Real behavior
+expect(page).to have_css('nav')
 
-// ❌ Mock existence
-expect(screen.getByTestId('sidebar-mock')).toBeInTheDocument();
+# ❌ Mock existence
+expect(page).to have_css('[data-testid="sidebar-mock"]')
 ```
 
 **your human partner's correction:** "Are we testing the behavior of a
@@ -101,14 +101,12 @@ before replacing it; mock the slow or external operation and keep what
 the test depends on real. When unsure, run the test against the real
 implementation first and observe what actually needs to happen.
 
-```typescript
-// ❌ The mock swallows the config write that duplicate detection reads
-vi.mock('ToolCatalog', () => ({
-  discoverAndCacheTools: vi.fn().mockResolvedValue(undefined)
-}));
+```ruby
+# ❌ The mock swallows the config write that duplicate detection reads
+allow(ToolCatalog).to receive(:discover_and_cache_tools).and_return(nil)
 
-// ✅ Mock only the slow server startup; the config write stays real
-vi.mock('MCPServerManager');
+# ✅ Mock only the slow server startup; the config write stays real
+allow(MCPServerManager).to receive(:start)
 ```
 
 **Make doubles specific.** When arguments, call counts, or ordering are
@@ -186,7 +184,7 @@ test as tautological.
 ## Warning Signs
 
 - Setup and assertion share the same object, guaranteeing equality
-- The test can fail only through a panic, crash, or missing selector
+- The test can fail only through a raised exception, crash, or missing selector
 - The test fails on every intentional change, never on accidental breakage
 - Expected values are hidden behind loops, builders, or helpers
 - The test greps source text, or asserts a removed symbol stays removed
