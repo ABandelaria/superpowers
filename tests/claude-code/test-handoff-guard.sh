@@ -160,7 +160,7 @@ inp = {
     'tool_name': 'AskUserQuestion',
     'tool_input': {
         'questions': [{
-            'question': 'Plan complete and saved to docs/superpowers/plans/2026-06-10-foo.md. How would you like to execute it?',
+            'question': 'Plan complete and saved to docs/battle-plans/2026-06-10-foo.md. How would you like to execute it?',
             'header': 'Execution',
             'options': [
                 {'label': 'Subagent-Driven (this session)', 'description': 'I dispatch fresh subagent per task, review between tasks, fast iteration'},
