@@ -61,7 +61,7 @@ rm -rf ~/.claude/skills/shared   # not a skill — see below
 - `~/.claude/skills/` is global. Per-project would be `.claude/skills/` inside each repo (avoids copying, but must be done per project).
 - **Limitation:** skills only — no hooks, so no auto-trigger. Invoke manually via `/<skill-name>` or the Skill tool. Fine for testing one skill, not for full Superpowers behavior.
 - **`skills/shared/` is not a skill** — it has no SKILL.md (just `task-format-reference.md`). Don't copy it as a skill dir.
-- **Cross-file references break.** Several skills reference sibling files by plugin-relative path (e.g. `skills/shared/task-format-reference.md`, brainstorming's `spec-document-reviewer-prompt.md`). Copied standalone into `~/.claude/skills/`, those paths no longer resolve. Expect degraded behavior for skills that lean on them (writing-plans, brainstorming, subagent-driven-development).
+- **Cross-file references break.** Several skills reference sibling files by plugin-relative path (e.g. `skills/shared/task-format-reference.md`). Copied standalone into `~/.claude/skills/`, those paths no longer resolve. Expect degraded behavior for skills that lean on them (writing-plans, brainstorming, subagent-driven-development).
 
 ---
 
